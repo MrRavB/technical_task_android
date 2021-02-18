@@ -48,5 +48,3 @@ class FetchUsersUseCaseTest {
         observer.assertValue(listOf(user3))
     }
 }
-
-private val USER_MOCK = User(name = "name", email = "email", createdAt = "createdAt")
