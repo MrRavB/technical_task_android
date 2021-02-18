@@ -8,7 +8,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 class RxImmediateSchedulerRule : TestRule {
-    override fun apply(base: Statement, description: Description): Statement {
+    override fun apply(base: Statement?, description: Description?): Statement {
         return object: Statement() {
             override fun evaluate() {
                 RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
@@ -17,7 +17,7 @@ class RxImmediateSchedulerRule : TestRule {
                 RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
 
                 try {
-                    base.evaluate()
+                    base?.evaluate()
                 } finally {
                     RxJavaPlugins.reset()
                     RxAndroidPlugins.reset()

@@ -14,13 +14,13 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
     private val _users = MutableLiveData<List<User>>()
     val users: LiveData<List<User>> = _users
 
-
     fun fetchUsers() {
         FetchUsersUseCase(api = api).execute()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { _networkStatus.value = NetworkStatus.LOADING }
             .doOnSuccess { _networkStatus.value = NetworkStatus.SUCCESS }
+            .doOnError { _networkStatus.value = NetworkStatus.ERROR }
             .subscribe(_users::setValue)
     }
 }
