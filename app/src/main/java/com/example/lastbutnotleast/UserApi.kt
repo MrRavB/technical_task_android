@@ -1,7 +1,10 @@
 package com.example.lastbutnotleast
 
 import io.reactivex.rxjava3.core.Single
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface UserApi {
-    fun getUsers(page: Int): Single<UserResponse>
+    @GET("users")
+    fun getUsers(@Query("page") page: Int = 1): Single<UserResponse>
 }
