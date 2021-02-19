@@ -14,7 +14,7 @@ class UsersViewModelTest {
     private lateinit var api: UserApi
     private lateinit var usersObserver: Observer<List<User>>
     private lateinit var networkObserver: Observer<NetworkStatus>
-    private lateinit var removeUserStatusObserver: Observer<NetworkStatus>
+    private lateinit var removeUserStatusObserver: Observer<SingleLiveEvent<NetworkStatus>>
 
     private lateinit var viewModel: UsersViewModel
 
@@ -65,9 +65,8 @@ class UsersViewModelTest {
         viewModel.removeUser(10)
 
         verifyOrder {
-            removeUserStatusObserver.onChanged(NetworkStatus.LOADING)
-            removeUserStatusObserver.onChanged(NetworkStatus.SUCCESS)
-            removeUserStatusObserver.onChanged(null)
+            removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.LOADING))
+            removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.SUCCESS))
             api.getUsers(any())
         }
     }
@@ -79,9 +78,8 @@ class UsersViewModelTest {
         viewModel.removeUser(13)
 
         verifyOrder {
-            removeUserStatusObserver.onChanged(NetworkStatus.LOADING)
-            removeUserStatusObserver.onChanged(NetworkStatus.ERROR)
-            removeUserStatusObserver.onChanged(null)
+            removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.LOADING))
+            removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.ERROR))
         }
     }
 }

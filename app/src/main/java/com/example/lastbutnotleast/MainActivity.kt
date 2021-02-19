@@ -1,22 +1,19 @@
 package com.example.lastbutnotleast
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,21 +48,34 @@ class MainActivity : AppCompatActivity() {
 fun Users(usersViewModel: UsersViewModel) {
     val users by usersViewModel.users.observeAsState()
     val networkStatus by usersViewModel.networkStatus.observeAsState()
+    val removeUserStatus by usersViewModel.removeUserStatus.observeAsState()
 
     when (networkStatus) {
-        NetworkStatus.LOADING -> Loading()
-        NetworkStatus.ERROR -> TODO()
+        NetworkStatus.LOADING -> Loading() //todo: move o the center
+        NetworkStatus.ERROR -> Text("Something went wrong") //todo: move o the center
         NetworkStatus.SUCCESS -> {
             LazyColumn {
                 items(items = users ?: emptyList()) {
-                    Card(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable {  }) {
+                    Card(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable { usersViewModel.removeUser(it.id) }) {
                         Text(text = it.name, style = TextStyle(fontSize = 16.sp), modifier = Modifier.padding(16.dp))
                     }
                 }
             }
         }
+        else -> {}
+    }
+
+    removeUserStatus?.getContentIfNotHandled()?.let {
+        when (it) {
+            NetworkStatus.SUCCESS -> ShowMessage("Removed")
+            NetworkStatus.LOADING -> ShowMessage("Removing")
+            NetworkStatus.ERROR -> ShowMessage("Remove user error")
+        }
     }
 }
+
+@Composable
+private fun ShowMessage(message: String) = Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
 
 @Composable
 fun Loading() {

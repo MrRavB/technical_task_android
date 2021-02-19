@@ -8,6 +8,7 @@ class Meta(val pagination: Pagination)
 
 class Pagination(val pages: Int)
 
-data class User(val name: String,
+data class User(val id: Long,
+                val name: String,
                 val email: String,
                 @SerializedName("created_at") val createdAt: String)

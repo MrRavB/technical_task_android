@@ -12,5 +12,5 @@ interface UserApi {
     fun getUsers(@Query("page") page: Int = 1): Single<UserResponse>
 
     @DELETE("users/{id}")
-    fun deleteUser(@Path("id") id: Int): Completable
+    fun deleteUser(@Path("id") id: Long): Completable
 }
