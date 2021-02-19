@@ -1,4 +1,4 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.model
 
 enum class NetworkStatus {
     SUCCESS,

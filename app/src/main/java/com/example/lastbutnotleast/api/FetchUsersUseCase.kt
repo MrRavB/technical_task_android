@@ -1,5 +1,6 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.api
 
+import com.example.lastbutnotleast.model.User
 import io.reactivex.rxjava3.core.Single
 
 class FetchUsersUseCase(private val api: UserApi) {

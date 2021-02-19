@@ -1,4 +1,4 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.model
 
 data class CreateUserRequest(val name: String,
                         val email: String,

@@ -2,6 +2,11 @@ package com.example.lastbutnotleast
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
+import com.example.lastbutnotleast.api.UserApi
+import com.example.lastbutnotleast.model.*
+import com.example.lastbutnotleast.ui.SingleLiveEvent
+import com.example.lastbutnotleast.ui.UserDraft
+import com.example.lastbutnotleast.ui.UsersViewModel
 import io.mockk.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single

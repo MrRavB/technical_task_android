@@ -1,4 +1,4 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.ui
 
 import android.os.Bundle
 import android.widget.Toast
@@ -33,6 +33,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.lastbutnotleast.api.UserApi
+import com.example.lastbutnotleast.api.UserApiClient
+import com.example.lastbutnotleast.model.NetworkStatus
 
 class MainActivity : AppCompatActivity() {
 

@@ -1,5 +1,7 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.api
 
+import com.example.lastbutnotleast.model.CreateUserRequest
+import com.example.lastbutnotleast.model.UserResponse
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.*

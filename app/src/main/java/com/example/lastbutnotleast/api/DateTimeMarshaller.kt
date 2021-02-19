@@ -1,4 +1,4 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.api
 
 import com.google.gson.*
 import org.threeten.bp.LocalDateTime

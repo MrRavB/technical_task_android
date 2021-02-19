@@ -1,11 +1,15 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.ui
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.lastbutnotleast.api.FetchUsersUseCase
+import com.example.lastbutnotleast.api.UserApi
+import com.example.lastbutnotleast.model.CreateUserRequest
+import com.example.lastbutnotleast.model.NetworkStatus
+import com.example.lastbutnotleast.model.User
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 class UsersViewModel(private val api: UserApi, private val compositeDisposable: CompositeDisposable = CompositeDisposable()): ViewModel() {
@@ -25,7 +29,8 @@ class UsersViewModel(private val api: UserApi, private val compositeDisposable: 
     val createUserStatus: LiveData<SingleLiveEvent<NetworkStatus>> = _createUserStatus
 
     fun fetchUsers() {
-        compositeDisposable.add(FetchUsersUseCase(api = api).execute()
+        compositeDisposable.add(
+            FetchUsersUseCase(api = api).execute()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { _networkStatus.value = NetworkStatus.LOADING }

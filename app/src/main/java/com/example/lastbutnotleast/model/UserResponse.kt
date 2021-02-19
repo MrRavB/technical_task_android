@@ -1,4 +1,4 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.model
 
 import com.google.gson.annotations.SerializedName
 import org.threeten.bp.LocalDateTime

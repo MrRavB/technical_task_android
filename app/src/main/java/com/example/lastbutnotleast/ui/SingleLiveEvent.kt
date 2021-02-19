@@ -1,4 +1,4 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.ui
 
 data class SingleLiveEvent<out T>(val content: T) {
 

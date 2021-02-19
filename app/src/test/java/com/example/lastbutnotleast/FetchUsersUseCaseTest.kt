@@ -1,5 +1,11 @@
 package com.example.lastbutnotleast
 
+import com.example.lastbutnotleast.api.FetchUsersUseCase
+import com.example.lastbutnotleast.api.UserApi
+import com.example.lastbutnotleast.model.Meta
+import com.example.lastbutnotleast.model.Pagination
+import com.example.lastbutnotleast.model.User
+import com.example.lastbutnotleast.model.UserResponse
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK

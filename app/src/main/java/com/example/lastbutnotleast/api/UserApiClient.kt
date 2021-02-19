@@ -1,7 +1,6 @@
-package com.example.lastbutnotleast
+package com.example.lastbutnotleast.api
 
 import com.google.gson.GsonBuilder
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.threeten.bp.LocalDateTime
 import retrofit2.Converter
