@@ -28,4 +28,9 @@ object UserApiClient {
             .build()
             .create(UserApi::class.java)
     }
+
+    private fun createConverter(): Converter.Factory =
+        GsonConverterFactory.create(
+            GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, DateTimeMarshaller()).create()
+        )
 }
