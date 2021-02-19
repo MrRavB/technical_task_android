@@ -77,8 +77,8 @@ fun Users(usersViewModel: UsersViewModel) {
     if (userIdToRemove != null) {
         AlertDialog(
             onDismissRequest = { },
-            confirmButton = { Button(onClick = { }) { Text("Confirm") } },
-            dismissButton = { Button(onClick = { }) { Text("Cancel") } },
+            confirmButton = { Button(onClick = { usersViewModel.confirmUserRemove() }) { Text("Confirm") } },
+            dismissButton = { Button(onClick = { usersViewModel.cancelUserRemove() }) { Text("Cancel") } },
             text = { Text("Are you sure you want to remove the user?") }
         )
     }

@@ -42,4 +42,15 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
     fun setUserIdToRemove(id: Long) {
         _userIdToRemove.value = id
     }
+
+    fun confirmUserRemove() {
+        userIdToRemove.value?.let {
+            removeUser(it)
+            _userIdToRemove.value = null
+        }
+    }
+
+    fun cancelUserRemove() {
+        _userIdToRemove.value = null
+    }
 }

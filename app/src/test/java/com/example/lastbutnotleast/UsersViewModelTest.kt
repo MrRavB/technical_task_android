@@ -92,4 +92,29 @@ class UsersViewModelTest {
 
         verify { userIdToRemoveObserver.onChanged(10) }
     }
+
+    @Test
+    fun confirmUserRemoveTest() {
+        every { api.deleteUser(15) } returns Completable.complete()
+        every { api.getUsers(any()) } returns Single.just(UserResponse(meta = Meta(pagination = Pagination(1)), data = listOf()))
+
+        viewModel.setUserIdToRemove(15)
+
+        viewModel.confirmUserRemove()
+
+        verify { api.deleteUser(15) }
+        verify { userIdToRemoveObserver.onChanged(null) }
+    }
+
+    @Test
+    fun cancelUserRemoveTest() {
+        viewModel.setUserIdToRemove(30)
+
+        viewModel.cancelUserRemove()
+
+        verifyOrder {
+            userIdToRemoveObserver.onChanged(30)
+            userIdToRemoveObserver.onChanged(null)
+        }
+    }
 }
