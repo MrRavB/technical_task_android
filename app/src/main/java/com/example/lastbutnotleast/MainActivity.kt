@@ -49,6 +49,7 @@ fun Users(usersViewModel: UsersViewModel) {
     val users by usersViewModel.users.observeAsState()
     val networkStatus by usersViewModel.networkStatus.observeAsState()
     val removeUserStatus by usersViewModel.removeUserStatus.observeAsState()
+    val userIdToRemove by usersViewModel.userIdToRemove.observeAsState()
 
     when (networkStatus) {
         NetworkStatus.LOADING -> Loading() //todo: move o the center
@@ -56,7 +57,7 @@ fun Users(usersViewModel: UsersViewModel) {
         NetworkStatus.SUCCESS -> {
             LazyColumn {
                 items(items = users ?: emptyList()) {
-                    Card(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable { usersViewModel.removeUser(it.id) }) {
+                    Card(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable { usersViewModel.setUserIdToRemove(it.id) }) {
                         Text(text = it.name, style = TextStyle(fontSize = 16.sp), modifier = Modifier.padding(16.dp))
                     }
                 }
@@ -71,6 +72,15 @@ fun Users(usersViewModel: UsersViewModel) {
             NetworkStatus.LOADING -> ShowMessage("Removing")
             NetworkStatus.ERROR -> ShowMessage("Remove user error")
         }
+    }
+
+    if (userIdToRemove != null) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = { Button(onClick = { }) { Text("Confirm") } },
+            dismissButton = { Button(onClick = { }) { Text("Cancel") } },
+            text = { Text("Are you sure you want to remove the user?") }
+        )
     }
 }
 

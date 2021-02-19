@@ -11,10 +11,13 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
     private val _networkStatus = MutableLiveData<NetworkStatus>()
     private val _removeUserStatus = MutableLiveData<SingleLiveEvent<NetworkStatus>>()
     private val _users = MutableLiveData<List<User>>()
+    private val _userIdToRemove = MutableLiveData<Long>()
 
     val networkStatus: LiveData<NetworkStatus> = _networkStatus
     val removeUserStatus: LiveData<SingleLiveEvent<NetworkStatus>> = _removeUserStatus
     val users: LiveData<List<User>> = _users
+    val userIdToRemove: LiveData<Long> = _userIdToRemove
+
 
     fun fetchUsers() {
         FetchUsersUseCase(api = api).execute()
@@ -34,5 +37,9 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
             .doOnComplete { _removeUserStatus.value = SingleLiveEvent(NetworkStatus.SUCCESS) }
             .doOnError { _removeUserStatus.value = SingleLiveEvent(NetworkStatus.ERROR) }
             .subscribe({ fetchUsers() }, { })
+    }
+
+    fun setUserIdToRemove(id: Long) {
+        _userIdToRemove.value = id
     }
 }

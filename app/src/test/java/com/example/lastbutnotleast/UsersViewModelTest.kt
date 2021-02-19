@@ -15,6 +15,7 @@ class UsersViewModelTest {
     private lateinit var usersObserver: Observer<List<User>>
     private lateinit var networkObserver: Observer<NetworkStatus>
     private lateinit var removeUserStatusObserver: Observer<SingleLiveEvent<NetworkStatus>>
+    private lateinit var userIdToRemoveObserver: Observer<Long>
 
     private lateinit var viewModel: UsersViewModel
 
@@ -29,10 +30,12 @@ class UsersViewModelTest {
         usersObserver = spyk()
         networkObserver = spyk()
         removeUserStatusObserver = spyk()
+        userIdToRemoveObserver = spyk()
         viewModel = UsersViewModel(api)
         viewModel.users.observeForever(usersObserver)
         viewModel.networkStatus.observeForever(networkObserver)
         viewModel.removeUserStatus.observeForever(removeUserStatusObserver)
+        viewModel.userIdToRemove.observeForever(userIdToRemoveObserver)
     }
 
     @Test
@@ -81,5 +84,12 @@ class UsersViewModelTest {
             removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.LOADING))
             removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.ERROR))
         }
+    }
+
+    @Test
+    fun setUserIdToRemoveTest() {
+        viewModel.setUserIdToRemove(10)
+
+        verify { userIdToRemoveObserver.onChanged(10) }
     }
 }
