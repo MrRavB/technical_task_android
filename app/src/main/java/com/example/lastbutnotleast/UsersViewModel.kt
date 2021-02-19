@@ -12,12 +12,13 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
     private val _removeUserStatus = MutableLiveData<SingleLiveEvent<NetworkStatus>>()
     private val _users = MutableLiveData<List<User>>()
     private val _userIdToRemove = MutableLiveData<Long>()
+    private val _userToCreate= MutableLiveData<UserDraft>()
 
     val networkStatus: LiveData<NetworkStatus> = _networkStatus
     val removeUserStatus: LiveData<SingleLiveEvent<NetworkStatus>> = _removeUserStatus
     val users: LiveData<List<User>> = _users
     val userIdToRemove: LiveData<Long> = _userIdToRemove
-
+    val userToCreate: LiveData<UserDraft> = _userToCreate
 
     fun fetchUsers() {
         FetchUsersUseCase(api = api).execute()
@@ -52,5 +53,17 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
 
     fun cancelUserRemove() {
         _userIdToRemove.value = null
+    }
+
+    fun updateUserToCreateName(name: String) {
+        _userToCreate.value = (_userToCreate.value ?: UserDraft()).copy(name = name)
+    }
+
+    fun updateUserToCreateEmail(email: String) {
+        _userToCreate.value = (_userToCreate.value ?: UserDraft()).copy(email = email)
+    }
+
+    fun clearUserToCreate() {
+        _userToCreate.value = null
     }
 }

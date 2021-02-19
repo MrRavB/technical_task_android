@@ -16,6 +16,7 @@ class UsersViewModelTest {
     private lateinit var networkObserver: Observer<NetworkStatus>
     private lateinit var removeUserStatusObserver: Observer<SingleLiveEvent<NetworkStatus>>
     private lateinit var userIdToRemoveObserver: Observer<Long>
+    private lateinit var userToCreateObserver: Observer<UserDraft>
 
     private lateinit var viewModel: UsersViewModel
 
@@ -31,11 +32,13 @@ class UsersViewModelTest {
         networkObserver = spyk()
         removeUserStatusObserver = spyk()
         userIdToRemoveObserver = spyk()
+        userToCreateObserver = spyk()
         viewModel = UsersViewModel(api)
         viewModel.users.observeForever(usersObserver)
         viewModel.networkStatus.observeForever(networkObserver)
         viewModel.removeUserStatus.observeForever(removeUserStatusObserver)
         viewModel.userIdToRemove.observeForever(userIdToRemoveObserver)
+        viewModel.userToCreate.observeForever(userToCreateObserver)
     }
 
     @Test
@@ -115,6 +118,45 @@ class UsersViewModelTest {
         verifyOrder {
             userIdToRemoveObserver.onChanged(30)
             userIdToRemoveObserver.onChanged(null)
+        }
+    }
+
+    @Test
+    fun updateUserToCreateNameTest() {
+        viewModel.updateUserToCreateName("John")
+
+        verify { userToCreateObserver.onChanged(UserDraft(name = "John")) }
+    }
+
+    @Test
+    fun updateUserToCreateEmailTest() {
+        viewModel.updateUserToCreateEmail("john@gmail.com")
+
+        verify { userToCreateObserver.onChanged(UserDraft(email = "john@gmail.com")) }
+    }
+
+    @Test
+    fun updateUserToCreateTest() {
+        viewModel.updateUserToCreateName("John")
+        viewModel.updateUserToCreateEmail("john@gmail.com")
+        viewModel.updateUserToCreateName("Sylvester")
+
+        verifyOrder {
+            userToCreateObserver.onChanged(UserDraft(name = "John"))
+            userToCreateObserver.onChanged(UserDraft(name = "John", email = "john@gmail.com"))
+            userToCreateObserver.onChanged(UserDraft(name = "Sylvester", email = "john@gmail.com"))
+        }
+    }
+
+    @Test
+    fun clearUserToCreateTest() {
+        viewModel.updateUserToCreateName("John")
+
+        viewModel.clearUserToCreate()
+
+        verifyOrder {
+            userToCreateObserver.onChanged(UserDraft(name = "John"))
+            userToCreateObserver.onChanged(null)
         }
     }
 }
