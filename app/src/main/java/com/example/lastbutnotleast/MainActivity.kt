@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,6 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.gesture.longPressGestureFilter
+import androidx.compose.ui.input.pointer.pointerInput
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,7 +46,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            Users(usersViewModel = viewModel)
+            MaterialTheme {
+                Users(usersViewModel = viewModel)
+            }
         }
     }
 
@@ -69,13 +74,13 @@ fun Users(usersViewModel: UsersViewModel) {
         NetworkStatus.ERROR -> RefreshError(usersViewModel)
         NetworkStatus.SUCCESS -> {
             LazyColumn {
-                items(items = users ?: emptyList()) {
-                    Card(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable { usersViewModel.setUserIdToRemove(it.id) }) {
+                items(items = users ?: emptyList()) { user ->
+                    Card(modifier = Modifier.padding(4.dp).fillMaxWidth().pointerInput { detectTapGestures(onLongPress = { usersViewModel.setUserIdToRemove(user.id) }) } ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            val duration = Duration.between(LocalDateTime.now(), it.createdAt).toMillis().toString()
-                            Text(text = it.name, style = TextStyle(fontSize = 16.sp))
+                            val duration = Duration.between(LocalDateTime.now(), user.createdAt).toMillis().toString()
+                            Text(text = user.name, style = TextStyle(fontSize = 16.sp))
                             Spacer(modifier = Modifier.padding(4.dp))
-                            Text(text = it.email, style = TextStyle(fontSize = 12.sp))
+                            Text(text = user.email, style = TextStyle(fontSize = 12.sp))
                             Spacer(modifier = Modifier.padding(4.dp))
                             Text(text = "Created $duration ms. ago", style = TextStyle(fontSize = 10.sp))
                         }

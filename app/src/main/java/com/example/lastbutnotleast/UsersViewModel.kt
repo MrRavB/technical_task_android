@@ -4,9 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
-class UsersViewModel(private val api: UserApi): ViewModel() {
+class UsersViewModel(private val api: UserApi, private val compositeDisposable: CompositeDisposable = CompositeDisposable()): ViewModel() {
 
     private val _networkStatus = MutableLiveData<NetworkStatus>()
     private val _removeUserStatus = MutableLiveData<SingleLiveEvent<NetworkStatus>>()
@@ -23,23 +25,23 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
     val createUserStatus: LiveData<SingleLiveEvent<NetworkStatus>> = _createUserStatus
 
     fun fetchUsers() {
-        FetchUsersUseCase(api = api).execute()
+        compositeDisposable.add(FetchUsersUseCase(api = api).execute()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { _networkStatus.value = NetworkStatus.LOADING }
             .doOnSuccess { _networkStatus.value = NetworkStatus.SUCCESS }
             .doOnError { _networkStatus.value = NetworkStatus.ERROR }
-            .subscribe(_users::setValue) { }
+            .subscribe(_users::setValue) { })
     }
 
     fun removeUser(id: Long) {
-        api.deleteUser(id = id)
+        compositeDisposable.add(api.deleteUser(id = id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { _removeUserStatus.value = SingleLiveEvent(NetworkStatus.LOADING) }
             .doOnComplete { _removeUserStatus.value = SingleLiveEvent(NetworkStatus.SUCCESS) }
             .doOnError { _removeUserStatus.value = SingleLiveEvent(NetworkStatus.ERROR) }
-            .subscribe({ fetchUsers() }, { })
+            .subscribe({ fetchUsers() }, { }))
     }
 
     fun setUserIdToRemove(id: Long) {
@@ -71,7 +73,7 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
 
     fun confirmCreateUser() {
         _userToCreate.value?.let {
-            api.createUser(CreateUserRequest(name = it.name, email = it.email))
+            compositeDisposable.add(api.createUser(CreateUserRequest(name = it.name, email = it.email))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { _createUserStatus.value = SingleLiveEvent(NetworkStatus.LOADING) }
@@ -80,7 +82,12 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
                     _userToCreate.value = null
                 }
                 .doOnError { _createUserStatus.value = SingleLiveEvent(NetworkStatus.ERROR) }
-                .subscribe({ fetchUsers() }, { })
+                .subscribe({ fetchUsers() }, { }))
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.dispose()
     }
 }
