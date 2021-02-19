@@ -58,6 +58,7 @@ fun Users(usersViewModel: UsersViewModel) {
     val removeUserStatus by usersViewModel.removeUserStatus.observeAsState()
     val userIdToRemove by usersViewModel.userIdToRemove.observeAsState()
     val userToCreate by usersViewModel.userToCreate.observeAsState()
+    val createUserStatus by usersViewModel.createUserStatus.observeAsState()
 
     when (networkStatus) {
         NetworkStatus.LOADING -> Loading()
@@ -83,7 +84,7 @@ fun Users(usersViewModel: UsersViewModel) {
         }
     }
 
-    if (userIdToRemove != null) {
+    userIdToRemove?.let {
         AlertDialog(
             onDismissRequest = { usersViewModel.cancelUserRemove() },
             confirmButton = { Button(onClick = { usersViewModel.confirmUserRemove() }) { Text("Confirm") } },
@@ -91,6 +92,15 @@ fun Users(usersViewModel: UsersViewModel) {
             text = { Text("Are you sure you want to remove the user?") }
         )
     }
+
+    createUserStatus?.getContentIfNotHandled()?.let {
+        when (it) {
+            NetworkStatus.SUCCESS -> ShowMessage("User created")
+            NetworkStatus.LOADING -> ShowMessage("Creating user")
+            NetworkStatus.ERROR -> ShowMessage("Create user error")
+        }
+    }
+
     userToCreate?.let { user ->
         Dialog(onDismissRequest = { usersViewModel.clearUserToCreate() }) {
             Box(modifier = Modifier.background(MaterialTheme.colors.background).padding(16.dp)) {
@@ -98,6 +108,12 @@ fun Users(usersViewModel: UsersViewModel) {
                     TextField(value = user.name, onValueChange = { usersViewModel.updateUserToCreateName(it) }, label = { Text("Name") })
                     Spacer(modifier = Modifier.padding(8.dp))
                     TextField(value = user.email, onValueChange = { usersViewModel.updateUserToCreateEmail(it) }, label = { Text("Email") })
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    Row(horizontalArrangement = Arrangement.End) {
+                        Button(onClick = { usersViewModel.clearUserToCreate() }) { Text("Cancel") }
+                        Spacer(modifier = Modifier.padding(4.dp))
+                        Button(onClick = { usersViewModel.confirmCreateUser() }) { Text("Confirm") }
+                    }
                 }
             }
         }

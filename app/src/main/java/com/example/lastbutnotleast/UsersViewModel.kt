@@ -12,13 +12,15 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
     private val _removeUserStatus = MutableLiveData<SingleLiveEvent<NetworkStatus>>()
     private val _users = MutableLiveData<List<User>>()
     private val _userIdToRemove = MutableLiveData<Long>()
-    private val _userToCreate= MutableLiveData<UserDraft>()
+    private val _userToCreate = MutableLiveData<UserDraft>()
+    private val _createUserStatus = MutableLiveData<SingleLiveEvent<NetworkStatus>>()
 
     val networkStatus: LiveData<NetworkStatus> = _networkStatus
     val removeUserStatus: LiveData<SingleLiveEvent<NetworkStatus>> = _removeUserStatus
     val users: LiveData<List<User>> = _users
     val userIdToRemove: LiveData<Long> = _userIdToRemove
     val userToCreate: LiveData<UserDraft> = _userToCreate
+    val createUserStatus: LiveData<SingleLiveEvent<NetworkStatus>> = _createUserStatus
 
     fun fetchUsers() {
         FetchUsersUseCase(api = api).execute()
@@ -65,5 +67,20 @@ class UsersViewModel(private val api: UserApi): ViewModel() {
 
     fun clearUserToCreate() {
         _userToCreate.value = null
+    }
+
+    fun confirmCreateUser() {
+        _userToCreate.value?.let {
+            api.createUser(CreateUserRequest(name = it.name, email = it.email))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { _createUserStatus.value = SingleLiveEvent(NetworkStatus.LOADING) }
+                .doOnComplete {
+                    _createUserStatus.value = SingleLiveEvent(NetworkStatus.SUCCESS)
+                    _userToCreate.value = null
+                }
+                .doOnError { _createUserStatus.value = SingleLiveEvent(NetworkStatus.ERROR) }
+                .subscribe({ fetchUsers() }, { })
+        }
     }
 }

@@ -2,10 +2,7 @@ package com.example.lastbutnotleast
 
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface UserApi {
     @GET("users")
@@ -13,4 +10,7 @@ interface UserApi {
 
     @DELETE("users/{id}")
     fun deleteUser(@Path("id") id: Long): Completable
+
+    @POST("users")
+    fun createUser(@Body body: CreateUserRequest): Completable
 }

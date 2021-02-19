@@ -17,6 +17,7 @@ class UsersViewModelTest {
     private lateinit var removeUserStatusObserver: Observer<SingleLiveEvent<NetworkStatus>>
     private lateinit var userIdToRemoveObserver: Observer<Long>
     private lateinit var userToCreateObserver: Observer<UserDraft>
+    private lateinit var createUserStatusObserver: Observer<SingleLiveEvent<NetworkStatus>>
 
     private lateinit var viewModel: UsersViewModel
 
@@ -33,12 +34,14 @@ class UsersViewModelTest {
         removeUserStatusObserver = spyk()
         userIdToRemoveObserver = spyk()
         userToCreateObserver = spyk()
+        createUserStatusObserver = spyk()
         viewModel = UsersViewModel(api)
         viewModel.users.observeForever(usersObserver)
         viewModel.networkStatus.observeForever(networkObserver)
         viewModel.removeUserStatus.observeForever(removeUserStatusObserver)
         viewModel.userIdToRemove.observeForever(userIdToRemoveObserver)
         viewModel.userToCreate.observeForever(userToCreateObserver)
+        viewModel.createUserStatus.observeForever(createUserStatusObserver)
     }
 
     @Test
@@ -49,6 +52,7 @@ class UsersViewModelTest {
         viewModel.fetchUsers()
 
         verifyOrder {
+            api.getUsers(1)
             networkObserver.onChanged(NetworkStatus.LOADING)
             networkObserver.onChanged(NetworkStatus.SUCCESS)
             usersObserver.onChanged(users)
@@ -71,6 +75,7 @@ class UsersViewModelTest {
         viewModel.removeUser(10)
 
         verifyOrder {
+            api.deleteUser(10)
             removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.LOADING))
             removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.SUCCESS))
             api.getUsers(any())
@@ -84,6 +89,7 @@ class UsersViewModelTest {
         viewModel.removeUser(13)
 
         verifyOrder {
+            api.deleteUser(13)
             removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.LOADING))
             removeUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.ERROR))
         }
@@ -158,5 +164,51 @@ class UsersViewModelTest {
             userToCreateObserver.onChanged(UserDraft(name = "John"))
             userToCreateObserver.onChanged(null)
         }
+    }
+
+    @Test
+    fun confirmUserCreateTest() {
+        every { api.createUser(any()) } returns Completable.complete()
+        viewModel.updateUserToCreateName("Name")
+        viewModel.updateUserToCreateEmail("Email")
+
+        viewModel.confirmCreateUser()
+
+        verify { api.createUser(CreateUserRequest(name = "Name", email = "Email")) }
+    }
+
+    @Test
+    fun createUserSuccessTest() {
+        every { api.createUser(any()) } returns Completable.complete()
+        every { api.getUsers(any()) } returns Single.just(UserResponse(meta = Meta(pagination = Pagination(3)), data = listOf()))
+
+        viewModel.updateUserToCreateName("Name")
+        viewModel.updateUserToCreateEmail("Email")
+
+        viewModel.confirmCreateUser()
+
+        verifyOrder {
+            createUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.LOADING))
+            createUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.SUCCESS))
+            userToCreateObserver.onChanged(null)
+            api.getUsers(3)
+        }
+    }
+
+    @Test
+    fun createUserFailureTest() {
+        every { api.createUser(any()) } returns Completable.error(Throwable())
+        every { api.getUsers(any()) } returns Single.just(UserResponse(meta = Meta(pagination = Pagination(3)), data = listOf()))
+
+        viewModel.updateUserToCreateName("Name")
+        viewModel.updateUserToCreateEmail("Email")
+
+        viewModel.confirmCreateUser()
+
+        verifyOrder {
+            createUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.LOADING))
+            createUserStatusObserver.onChanged(SingleLiveEvent(NetworkStatus.ERROR))
+        }
+        verify(exactly = 0) { api.getUsers(any()) }
     }
 }
