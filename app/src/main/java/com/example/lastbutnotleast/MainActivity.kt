@@ -13,26 +13,30 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.jakewharton.threetenabp.AndroidThreeTen
+import org.threeten.bp.Duration
+import org.threeten.bp.LocalDateTime
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.materialIcon
+import androidx.compose.ui.Alignment
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val api = UserApiClient.getUserApi()
-        val viewModel = createViewModel(api).apply {
+        AndroidThreeTen.init(this)
+        val viewModel = createViewModel(UserApiClient.getUserApi()).apply {
             if (savedInstanceState == null) {
                 fetchUsers()
             }
@@ -62,12 +66,19 @@ fun Users(usersViewModel: UsersViewModel) {
 
     when (networkStatus) {
         NetworkStatus.LOADING -> Loading()
-        NetworkStatus.ERROR -> Text("Something went wrong") //todo: move o the center
+        NetworkStatus.ERROR -> RefreshError(usersViewModel)
         NetworkStatus.SUCCESS -> {
             LazyColumn {
                 items(items = users ?: emptyList()) {
                     Card(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable { usersViewModel.setUserIdToRemove(it.id) }) {
-                        Text(text = it.name, style = TextStyle(fontSize = 16.sp), modifier = Modifier.padding(16.dp))
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            val duration = Duration.between(LocalDateTime.now(), it.createdAt).toMillis().toString()
+                            Text(text = it.name, style = TextStyle(fontSize = 16.sp))
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Text(text = it.email, style = TextStyle(fontSize = 12.sp))
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Text(text = "Created $duration ms. ago", style = TextStyle(fontSize = 10.sp))
+                        }
                     }
                 }
             }
@@ -104,7 +115,7 @@ fun Users(usersViewModel: UsersViewModel) {
     userToCreate?.let { user ->
         Dialog(onDismissRequest = { usersViewModel.clearUserToCreate() }) {
             Box(modifier = Modifier.background(MaterialTheme.colors.background).padding(16.dp)) {
-                Column {
+                Column(horizontalAlignment = Alignment.End) {
                     TextField(value = user.name, onValueChange = { usersViewModel.updateUserToCreateName(it) }, label = { Text("Name") })
                     Spacer(modifier = Modifier.padding(8.dp))
                     TextField(value = user.email, onValueChange = { usersViewModel.updateUserToCreateEmail(it) }, label = { Text("Email") })
@@ -117,6 +128,16 @@ fun Users(usersViewModel: UsersViewModel) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun RefreshError(viewModel: UsersViewModel) {
+    Column(
+        modifier = Modifier.fillMaxSize().clickable { viewModel.fetchUsers() },
+        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "Something went wrong")
+        Text(text = "Click to refresh")
     }
 }
 
@@ -143,6 +164,8 @@ private fun AddUserButton(viewModel: UsersViewModel) {
         FloatingActionButton(modifier = Modifier.padding(16.dp).constrainAs(ref) {
             bottom.linkTo(parent.bottom)
             end.linkTo(parent.end)
-        }, onClick = {viewModel.updateUserToCreateEmail("")}) { }
+        }, onClick = { viewModel.updateUserToCreateEmail("")} ) {
+            Icon(imageVector = Icons.Filled.Add, contentDescription = "add user")
+        }
     }
 }

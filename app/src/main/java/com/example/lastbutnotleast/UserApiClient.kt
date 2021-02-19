@@ -1,7 +1,10 @@
 package com.example.lastbutnotleast
 
+import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import org.threeten.bp.LocalDateTime
+import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -14,15 +17,18 @@ private const val BASE_URL = "https://gorest.co.in/public-api/"
 object UserApiClient {
     fun getUserApi(): UserApi {
         val okHttpClient = OkHttpClient.Builder()
-            .addNetworkInterceptor(Interceptor { chain ->
-                chain.proceed(chain.request().newBuilder()
-                    .addHeader(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_PREFIX + ACCESS_TOKEN)
-                    .build())
-            }).build()
+            .addNetworkInterceptor { chain ->
+                chain.proceed(
+                    chain.request().newBuilder()
+                        .addHeader(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_PREFIX + ACCESS_TOKEN)
+                        .build()
+                )
+            }.build()
 
         return Retrofit.Builder()
             .client(okHttpClient)
             .baseUrl(BASE_URL)
+            .addConverterFactory(createConverter())
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
